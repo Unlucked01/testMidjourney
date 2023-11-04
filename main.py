@@ -19,7 +19,7 @@ bot = Bot(token=os.getenv('BOT_TOKEN'))
 dp = Dispatcher()
 
 
-async def get_image(prompt: str, width=768, height=1024, negative="None"):
+async def get_image(prompt: str, width=768, height=768, negative="None"):
     loop = asyncio.get_event_loop()
 
     def generate_image():
