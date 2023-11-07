@@ -4,25 +4,21 @@ import logging
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram import types
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 import os
-import replicate
 import dotenv
 
-import concurrent.futures
 
 dotenv.load_dotenv()
 
-os.environ["REPLICATE_API_TOKEN"] = os.getenv('REPLICATE_KEY')
-
-client = OpenAI()
+client = AsyncOpenAI()
 bot = Bot(token=os.getenv('BOT_TOKEN'))
 dp = Dispatcher()
 
 
 async def get_image(prompt):
-    response = client.images.generate(
+    response = await client.images.generate(
         model="dall-e-3",
         prompt=prompt,
         size="1024x1024",
