@@ -24,7 +24,7 @@ async def get_image(prompt: str, width=768, height=768, negative="None"):
 
     def generate_image():
         return replicate.run(
-            "tstramer/midjourney-diffusion:436b051ebd8f68d23e83d22de5e198e0995357afef113768c20f0b6fcef23c8b",
+            "prompthero/openjourney:ad59ca21177f9e217b9075e7300cf6e14f7e5b4505b87b9689dbd866e9768969",
             input={"prompt": "mdjrny-v4 " + prompt, "negative_prompt": negative,
                     "width": width, "height": height}
         )
