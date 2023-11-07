@@ -26,13 +26,15 @@ async def get_image(prompt: str, width=768, height=768, negative="None"):
         return replicate.run(
             "prompthero/openjourney:ad59ca21177f9e217b9075e7300cf6e14f7e5b4505b87b9689dbd866e9768969",
             input={"prompt": "mdjrny-v4 " + prompt, "negative_prompt": negative,
-                    "width": width, "height": height}
+                   "width": width, "height": height}
         )
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(generate_image)
         output = await loop.run_in_executor(None, future.result)
-    return output[0]
+
+    for image in output:
+        return image
 
 
 @dp.message()
