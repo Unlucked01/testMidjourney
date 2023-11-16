@@ -4,7 +4,7 @@ import logging
 from aiogram import Bot
 from aiogram import Dispatcher
 from aiogram import types
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, APIError
 
 import os
 import dotenv
@@ -12,7 +12,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-client = AsyncOpenAI()
+client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 bot = Bot(token=os.getenv('BOT_TOKEN'))
 dp = Dispatcher()
 
@@ -35,12 +35,13 @@ async def get_message(message: types.Message):
         text="Генерация изображения...",
     )
     if message.text:
-        out = await get_image(message.text)
-        if out:
+        try:
+            out = await get_image(message.text)
             await message.reply_photo(
                 photo=out,
             )
-        else:
+        except APIError as e:
+            print(e.message)
             await message.reply("Не удалось сгенерировать картинку")
     else:
         await message.reply("Не удалось обработать запрос")
