@@ -12,8 +12,9 @@ import dotenv
 
 dotenv.load_dotenv()
 
-client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = AsyncOpenAI()
 bot = Bot(token=os.getenv('BOT_TOKEN'))
+os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 dp = Dispatcher()
 
 
