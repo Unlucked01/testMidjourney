@@ -26,3 +26,4 @@ typing_extensions==4.7.1
 yarl==1.9.2
 
 requests~=2.31.0
+Pillow~=10.1.0
