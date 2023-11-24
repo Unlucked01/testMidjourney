@@ -34,20 +34,28 @@ async def generate_image(prompt):
 
 async def redact_image(photo, prompt):
     # img = Image.open(photo)
-    # width, height = 256, 256
+    # width, height = 512, 512
     # image = img.resize((width, height))
-
     # byte_stream = BytesIO()
     # image.save(byte_stream, format='PNG')
     # byte_array = byte_stream.getvalue()
 
-    response = await client.images.edit(
-        model="dall-e-2",
+    response = await client.images.create_variation(
         image=open(photo, 'rb'),
-        prompt=prompt,
         n=1,
+        model="dall-e-2",
         size="1024x1024"
     )
+
+    # return response.data[0].url
+    # response = await client.images.edit(
+    #     model="dall-e-2",
+    #     image=byte_array,
+    #     mask=open("photos/mask.png", "rb"),
+    #     prompt=prompt,
+    #     n=1,
+    #     size="512x512"
+    # )
     return response.data[0].url
 
 
@@ -56,8 +64,9 @@ async def get_message(message: types.Message):
     photo_id = message.photo[0].file_id
     file = await bot.get_file(photo_id)
     file_path = file.file_path
-    await bot.download_file(file_path, "test.png")
-    response = await redact_image("test.png", "убери бутылку из рук")
+    destination = f"photos/{photo_id}.png"
+    await bot.download_file(file_path, destination)
+    response = await redact_image(destination, "")
     await message.reply_photo(photo=response)
     # await bot.send_message(
     #     chat_id=message.chat.id,
