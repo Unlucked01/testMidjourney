@@ -17,6 +17,8 @@ from PIL import Image
 import os
 import dotenv
 
+from read_gSheets import read
+
 dotenv.load_dotenv()
 
 client = AsyncOpenAI()
@@ -42,37 +44,18 @@ def encode_image(image_path):
     return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-async def image_to_text(photo_url):
-    response = await client.chat.completions.create(
-        model="gpt-4-vision-preview",
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "What’s in this image?"},
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": photo_url,
-                        },
-                    },
-                ],
-            }
-        ],
-        max_tokens=300,
-    )
-    return response.choices[0].message.content
-
-
-async def text_to_image(prompt):
-    response = await client.images.generate(
-        model="dall-e-3",
-        prompt=prompt,
-        size="1792x1024",
-        quality="standard",
-        n=1,
-    )
-    return response.data[0].url
+async def text_to_image(prompt, message):
+    try:
+        response = await client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size="1792x1024",
+            quality="standard",
+            n=1,
+        )
+        return response.data[0].url
+    except:
+        await message.reply("Не удалось обработать запрос!")
 
 
 def send_image(base64_image):
@@ -89,9 +72,7 @@ def send_image(base64_image):
                 "content": [
                     {
                         "type": "text",
-                        "text": "Describe everything on picture like you are "
-                                "trying to generate an interior out of your prompt, "
-                                "avoid making collage, do the whole interior"
+                        "text": read()
                     },
                     {
                         "type": "image_url",
@@ -113,7 +94,7 @@ async def get_message(message: types.Message):
     match message.content_type:
         case ContentType.TEXT:
             print("text generating")
-            txt2img = await text_to_image(message.text)
+            txt2img = await text_to_image(message.text, message)
             print(txt2img)
             await message.reply_photo(photo=txt2img)
         case ContentType.PHOTO:
@@ -130,7 +111,7 @@ async def get_message(message: types.Message):
 
                 img2txt = result['choices'][0]['message']['content']
                 print(img2txt)
-                txt2img = await text_to_image(img2txt)
+                txt2img = await text_to_image(img2txt, message)
                 await message.reply_photo(photo=txt2img)
         case _:
             await message.reply("Не распознано...")
