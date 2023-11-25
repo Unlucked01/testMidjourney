@@ -1,7 +1,9 @@
 import asyncio
 import logging
+import time
 from io import BytesIO
 
+import requests
 from aiogram import Bot, F
 from aiogram import Dispatcher
 from aiogram import types
@@ -12,6 +14,11 @@ from PIL import Image
 
 import os
 import dotenv
+from selenium.webdriver import ActionChains
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 dotenv.load_dotenv()
 
@@ -19,6 +26,67 @@ client = AsyncOpenAI()
 bot = Bot(token=os.getenv('BOT_TOKEN'))
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 dp = Dispatcher()
+
+login = os.getenv('LOGIN')
+password = os.getenv('PASSWORD')
+upload_file = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           "..", "testMidjourney/photos/test-1.jpeg"))
+
+download_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           "..", "testMidjourney/photos/"))
+
+
+def generate_image_from_site():
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    chrome_options = Options()
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument(f"download.default_directory={download_dir}")
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(f'https://www.stylar.ai/')
+    time.sleep(2)
+    driver.find_element(By.CLASS_NAME, 'login-1').click()
+    time.sleep(3)
+    driver.find_element(By.NAME, 'username').send_keys(login)
+    driver.find_element(By.NAME, 'password').send_keys(password)
+    time.sleep(3)
+    driver.find_element(By.CLASS_NAME, 'continue').click()
+    time.sleep(3)
+    driver.find_element(By.CLASS_NAME, 'new-project').click()
+    time.sleep(3)
+    # driver.find_element(By.CLASS_NAME, 'c-scale-size')
+    # driver.find_element(By.TAG_NAME, 'button').click()
+    # buttons = driver.find_element(By.CLASS_NAME, 'dialog-content')
+    # button_elements = buttons.find_elements(By.TAG_NAME, 'button') # apply aspect ratio
+    # button_elements.pop()
+    # button_elements.pop().click()
+    # time.sleep(3)
+    # return
+    file_input = driver.find_element(By.CLASS_NAME, "file")
+    file_input.send_keys(upload_file)
+    time.sleep(3)
+    driver.find_element(By.CLASS_NAME, 'img2img').click()
+    time.sleep(3)
+    driver.find_element(By.CLASS_NAME, 'hide-style').click()
+    group_elements = driver.find_element(By.CLASS_NAME, 'styles')
+    li_elements = group_elements.find_elements(By.TAG_NAME, 'li')
+    li_elements.pop().click()
+    time.sleep(3)
+    driver.find_element(By.CLASS_NAME, 'generative').click()
+    time.sleep(40)
+    driver.find_element(By.CLASS_NAME, 'image-cover').click()
+    time.sleep(2)
+    driver.find_element(By.CLASS_NAME, 'result-on-canvas').click()
+    time.sleep(7)
+    export = driver.find_element(By.CLASS_NAME, 'c-export')
+    export.find_element(By.CLASS_NAME, 'export').click()
+    time.sleep(3)
+    export_dialog = driver.find_element(By.CLASS_NAME, 'c-export-dialog')
+    download_footer = export_dialog.find_element(By.CLASS_NAME, 'export-dialog-footer')
+    download_footer.find_element(By.CLASS_NAME, 'small').click()
+    time.sleep(3)
+    driver.close()
+    return
 
 
 async def generate_image(prompt):
@@ -86,8 +154,9 @@ async def get_message(message: types.Message):
 
 
 async def main():
-    logging.basicConfig(level=logging.INFO)
-    await dp.start_polling(bot)
+    generate_image_from_site()
+    # logging.basicConfig(level=logging.INFO)
+    # await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
