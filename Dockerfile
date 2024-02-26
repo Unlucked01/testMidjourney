@@ -6,4 +6,4 @@ COPY . /app
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "main.py"]
+CMD ["python", "main_v2.py"]
